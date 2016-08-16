@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>reveal.js</title>
+    <title>Service Workers: The Workering</title>
 
     <link rel="stylesheet" href="css/reveal.css">
-    <link rel="stylesheet" href="css/theme/black.css">
+    <link rel="stylesheet" href="css/theme/nightly.css">
 
     <!-- Theme used for syntax highlighting of code -->
     <link rel="stylesheet" href="lib/css/zenburn.css">
@@ -24,8 +24,396 @@
   <body>
     <div class="reveal">
       <div class="slides">
-        <section>Slide 1</section>
-        <section>Slide 2</section>
+        <section>
+          <h2>
+          Service Workers
+          </h2>
+          <h3>
+          The Workering
+          </h3>
+          <h4>
+          Ben Kelly (<a href="https://twitter.com/wanderview" target="_blank" rel="noopener">@wanderview</a>)
+          </h4>
+        </section>
+        <section>
+          <img src="img/dom.png" style="border:0">
+        </section>
+        <section>
+        What are service workers?
+        </section>
+        <section>
+        <img src="img/standards.png" style="border:0">
+        <p>Standardized Web API</p>
+        </section>
+        <section>
+        <img src="img/prime-minister-justin-trudeau.jpg" style="border:0">
+        <p>Run JS in the background</p>
+        </section>
+        <section>
+        <img src="img/lie-fi.jpg" style="border:0">
+        <p>Work offline</p>
+        </section>
+        <section>
+        <img src="img/push-demo-3x.gif" style="border:0">
+        <p>Receive push notifications</p>
+        </section>
+        <section>
+        <img src="img/Fire.JPG" style="border:0">
+        <p>And much more...</p>
+        </section>
+        <section>
+        Why do we need this thing?
+        </section>
+        <section>
+        <a href="http://cdixon.org/2014/04/07/the-decline-of-the-mobile-web/" target="_blank" rel="noopener">
+        <img src="img/mobile-web-doomed.png" style="border:0">
+        </a>
+        <p>2014: The web is doomed!</p>
+        </section>
+        <section>
+        <a href="http://www.comscore.com/Insights/Data-Mine/Mobile-App-vs-Mobile-Browser" target="_blank" rel="noopener">
+        <img src="img/access-method-for-mobile-shoppers.jpg" style="border:0">
+        </a>
+        <p>2016: Not dead yet..</p>
+        </section>
+        <section>
+        <a href="http://www.recode.net/2016/6/8/11883518/app-boom-over-snapchat-uber" target="_blank" rel="noopener">
+        <img src="img/app-downloads.png" style="border:0; max-height:480px">
+        </a>
+        <p>2016: Apps are starting to saturate</p>
+        </section>
+        <section>
+        <a href="https://infrequently.org/2015/06/progressive-apps-escaping-tabs-without-losing-our-soul/" target="_blank" rel="noopener">
+        <img src="img/pwa-post.png" style="border:0;max-height:480px">
+        </a>
+        <p>What if we could have the best of both worlds?</p>
+        </section>
+        <section>
+          <p>Progressive Web Apps</p>
+          <p class="fragment">PWA</p>
+          <p class="fragment">PoWA?</p>
+          <p class="fragment">P - W - A</p>
+        </section>
+        <section>
+        <a href="https://developers.google.com/web/showcase/2016/konga" target="_blank" rel="noopener">
+        <img src="img/konga-stats.jpg" style="border:0">
+        </a>
+        </section>
+        <section>
+        <a href="https://developers.google.com/web/showcase/2016/aliexpress" target="_blank" rel="noopener">
+        <img src="img/aliexpress-stats.jpg" style="border:0">
+        </a>
+        </section>
+        <section>
+        <a href="https://developers.google.com/web/showcase/2016/flipkart" target="_blank" rel="noopener">
+        <img src="img/flipkart-stats.jpg" style="border:0">
+        </a>
+        </section>
+        <section>
+        How does all this work?
+        </section>
+        <section>
+        <img src="img/worker-diagram.png" style="border:0">
+        <p>Workers execute JS on separate threads</p>
+        </section>
+        <section>
+        <img src="img/kirby.gif" style="border:0">
+        <p>
+        See Nolan Lawson's
+        (<a href="https://twitter.com/nolanlawson" target="_blank" rel="noopener">@nolanlawson</a>)
+        <a href="https://nolanlawson.com/2015/09/29/indexeddb-websql-localstorage-what-blocks-the-dom/" target="_blank" rel="noopener">
+        blog</a> and
+        <a href="http://nolanlawson.github.io/database-comparison/" target="_blank" rel="noopener">demo</a>
+        about moving storage work to a separate thread.
+        </p>
+        </section>
+        <section>
+        <p>Things to note about dedicated Workers:</p>
+        <ul>
+          <li class="fragment">
+          Created directly via - <code>new Worker(scriptURL)</code>
+          </li>
+          <li class="fragment">
+          Threads live until <code>Worker</code> object is garbage collected
+          </li>
+          <li class="fragment">
+          Closing the owning window will terminate the thread
+          </li>
+        </ul>
+        </section>
+        <section>
+        <p>Service Workers are Different</p>
+        <ul>
+          <li class="fragment">
+          can run when you have no window for the site
+          </li>
+          <li class="fragment">
+          threads are killed and restarted often
+          </li>
+          <li class="fragment">
+          browser manages code updates
+          </li>
+        </ul>
+        </section>
+        <section>
+        <img src="img/lifecycle-diagram.png" style="border:0">
+        <p>Service Worker Lifecycle</p>
+        </section>
+        <section>
+        <img src="img/lifecycle-update-diagram.png" style="border:0">
+        <p>What happens during an update?</p>
+        </section>
+        <section>
+        <p>Registering a Service Worker</p>
+        <pre><code>
+        // In your index.html
+        if (navigator.serviceWorker) {
+          navigator.serviceWorker.register('sw.js').then(swr => {
+            console.log('registered service worker!');
+          }).catch(e => {
+            console.log('failed to register service worker!');
+          });
+        }
+        </code></pre>
+        <ul>
+          <li class="fragment">
+          Requires https
+          </li>
+          <li class="fragment">
+          Can use http://localhost for development, but not file://
+          </li>
+          <li class="fragment">
+          Can scope the registration as well, but lets ignore that for now
+          </li>
+        </ul>
+        </section>
+        <section>
+        <p>Lifecycle Events</p>
+        <pre><code>
+        // In your service worker script
+
+        self.addEventListener('install', evt => {
+          console.log('Installing!');
+        });
+
+        self.addEventListener('activate', evt => {
+          console.log('Activating!');
+        });
+        </code></pre>
+        </section>
+        <section>
+        <img src="img/ecMbnapcn.jpeg" style="border:0;max-height:480px">
+        <p>Worker thread can be killed while doing async operations</p>
+        </section>
+        <section>
+        <p><code>waitUntil()</code> to the rescue!</p>
+        <pre><code>
+        // In your service worker script
+
+        function asyncWork() {
+          return new Promise(resolve => { setTimeout(resolve, 5000); });
+        }
+
+        self.addEventListener('install', evt => {
+          console.log('Install starting');
+          evt.waitUntil(asyncWork().then(_ => {
+            console.log('Install complete!');
+          });
+        });
+
+        self.addEventListener('activate', evt => {
+          console.log('Activate starting!');
+          evt.waitUntil(asyncWork().then(_ => {
+            console.log('Activate complete!');
+          });
+        });
+        </code></pre>
+        </section>
+        <section>
+        <p>Fetch API</p>
+        <pre><code>
+        fetch('http://example.com/my/rest/api').then(response => {
+          return response.text();
+        }).then(text => {
+          console.log(text);
+        }).catch(e => {
+          console.error(e);
+        });
+        </code></pre>
+        <p class="fragment">See
+        <a href="https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API" target="_blank" rel="noopener">
+        MDN</a> for more documentation.</p>
+        </section>
+        <section>
+        <p>Cache API</p>
+        <pre><code>
+        var url = 'http://example.com/my/asset';
+        var cache;
+        caches.open('my-cache').then(c => {
+          cache = c;
+          return fetch(url);
+        }).then(response => {
+          return cache.put(url, response);
+        }).then(_ => {
+          cache.match(url);
+        }).then(response => {
+          return response.text();
+        }).then(text => {
+          return cache.delete(url);
+        }).then(result => {
+          // result should be true
+          return caches.delete('my-cache');
+        }).then(result => {
+          // result should be true
+        });
+        </code></pre>
+        <ul>
+          <li class="fragment">
+          Storage API like IndexedDB
+          </li>
+          <li class="fragment">
+          See
+          <a href="https://developer.mozilla.org/en-US/docs/Web/API/CacheStorage" target="_blank" rel="noopener">
+          MDN</a> for more documentation.</p>
+          </li>
+        </ul>
+        </section>
+        <section>
+        <p>Pre-cache Assets in the Install Event</p>
+        <pre><code>
+        var cacheName = 'myCache';
+
+        var assets = [
+          'http://example.com/my/asset/1',
+          'http://example.com/my/asset/2',
+        ];
+
+        self.addEventListener('install', evt => {
+          evt.waitUntil(caches.open(cacheName).then(cache => {
+            var requests = assets.map(url => new Request(url, { cache: 'no-cache' }));
+            cache.addAll(requests);
+          });
+        });
+        </code></pre>
+        </section>
+        <section>
+        <p>Cleanup old Assets in the Activate Event</p>
+        <pre><code>
+        var cacheName = 'myCache';
+
+        self.addEventListener('activate', evt => {
+          evt.waitUntil(caches.keys().then(list => {
+            return Promise.all(
+              list.map(name => {
+                if (name === cacheName) {
+                  return;
+                }
+                return caches.delete(name);
+              });
+            );
+          });
+        });
+        </code></pre>
+        </section>
+        <section>
+        <p>Fetch Event</p>
+        <pre><code>
+        self.addEventListener('fetch', evt => {
+          console.log('Network request for ' + evt.request.url);
+        });
+        </code></pre>
+        <ul>
+          <li class="fragment">
+          Fired when the browser makes a network request
+          </li>
+          <li class="fragment">
+          <code>FetchEvent.request</code> holds the original request
+          </li>
+          <li class="fragment">
+          <code>FetchEvent.respondWith()</code> allows you to provide a custom response
+          </li>
+          <li class="fragment">
+          <code>FetchEvent.respondWith()</code> also acts like <code>waitUntil()</code>
+          </li>
+        </ul>
+        </section>
+        <section>
+        <p>Which Network Request Get a Fetch Event?</p>
+        <ul>
+          <li class="fragment">
+          Top level requests that match the service worker registration scope
+          <ul>
+            <li>
+            Document index.html requests
+            </li>
+            <li>
+            Worker script requests
+            </li>
+          </ul>
+          </li>
+          <li class="fragment">
+          Once the top level request matches, the document or worker is
+          said to be "controlled" by the service worker.
+          </li>
+          <li class="fragment">
+          <code>navigator.serviceWorker.controller</code>
+          </li>
+          <li class="fragment">
+          All network requests made by that document or worker are then
+          also intercepted by the service worker.
+          </li>
+        </ul>
+        </section>
+        <section>
+        <p>Offline Pre-Cached Assets</p>
+        <pre><code>
+        self.addEventListener('fetch', evt => {
+          evt.respondWith(caches.open(myCache).then(cache => {
+            // First try to find a pre-cached response
+            return cache.match(evt.request);
+          }).then(response => {
+            // Fallback to network
+            return response || fetch(evt.request);
+          }).catch(e => {
+            // Fallback to network if we hit an unexpected error
+            return fetch(evt.request);
+          }));
+        });
+        </code></pre>
+        </section>
+        <section>
+        <p>This slide deck uses a service worker.</p>
+        <p><a href="sw.js" target="_blank" rel="noopener">Check it out!</a></p>
+        </section>
+        <section>
+        <p>What about push notifications?</p>
+        <ul>
+          <li class="fragment">
+          Uh... I ran out of time...
+          </li>
+          <li class="fragment">
+          Documentation on
+          <a href="https://developer.mozilla.org/en-US/docs/Web/API/Push_API/Using_the_Push_API" target="_blank" rel="noopener">
+          MDN</a>
+          </li>
+          <li class="fragment">
+          Nice <a href="https://gauntface.github.io/simple-push-demo/" target="_blank" rel="noopener">demo</a>
+          from Matt Gaunt (<a href="https://twitter.com/gauntface" target="_blank" rel="noopener">@gauntface</a>)
+          </li>
+        </ul>
+        </section>
+        <section>
+        <p>Moar Resources!</p>
+        <ul>
+          <li class="fragment">
+          <a href="https://serviceworke.rs/" target="_blank" rel="noopener">serviceworke.rs</a>
+          </li>
+          <li class="fragment">
+          <a href="https://www.udacity.com/course/offline-web-applications--ud899" target="_blank" rel="noopener">
+          Udacity Course</a>
+          </li>
+        </ul>
+        </section>
       </div>
     </div>
 
@@ -45,6 +433,14 @@
           { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } }
         ]
       });
+    </script>
+
+    <script>
+    if (navigator.serviceWorker &&
+        (!navigator.serviceWorker.controller ||
+         navigator.serviceWorker.controller.scriptURL.indexOf('slides-rochesterjs-august-2016') === -1)) {
+      navigator.serviceWorker.register('sw.js');
+    }
     </script>
   </body>
 </html>
